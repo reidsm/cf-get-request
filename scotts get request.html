@@ -1,0 +1,39 @@
+<body>
+	<form>
+        <input type="text" id="skuForm" value="" />
+        <input type="date" id="dateForm" value="" />
+        <input type="number" id="paramForm" value="" />
+	</form>
+	<button type="button" onclick="handleRequest()">Click Me!</button>
+</body>
+
+<script>
+  /*This is the function that the button calls. It defines sku 
+  as a variable based on the value in the text form.
+  Then, it passes sku to the function requestItemInfo.*/
+function handleRequest() {
+	var sku = getSku();
+    if (sku !== null) {
+    	requestItemInfo(sku);
+    }
+}
+  /*This function finds the value of sku from the input form and makes it accessible by other 
+  functions - namely handleRequest()*/
+function getSku() {
+  var sku = document.getElementById('skuForm').value;
+  return sku;
+}
+
+function requestItemInfo(sku) {//creates a function and passes in the variable 'sku', the function will make a GET request to Checkfront's API
+  	var endpoint = "https://robscoolscooters.checkfront.com/api/3.0/item?sku=" + sku;//concatenates string based on item
+	var xhr = new XMLHttpRequest();//creates a new instance of the XMLHttpRequest() called xhr
+	xhr.open("GET", endpoint); //(method, url), method can be get, post, put, delete
+	xhr.setRequestHeader("Content-Type", "application/json"); //(the name of the header whose value is to be set,the value to set as the body of the header)
+	xhr.send();//(body), optional, can be a document or formdata
+  	xhr.onload = function (data) {//this is the function called when the xhr request completes successfully
+      	var response = JSON.parse(data.currentTarget.response)//the response is text but this parses the text into a json object
+ 		console.log(response);//dumps json object into the console
+         console.log(endpoint);
+    }
+}
+</script>
