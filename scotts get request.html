@@ -5,27 +5,21 @@
   </form>
   <button type="button" onclick="handleRequest()">Click Me!</button>
   <pre id="response"></pre>
-  <p id="p1">111</p>
 </body>
 
 <script>
-
-  /*This function finds the value of sku from the input form and makes it accessible by other 
-  functions - namely handleRequest()*/
-
+//this function gathers data from the form to be called by handleRequest later
 function getDateForm() {
   var dateForm = document.getElementById('dateForm').value;
   return dateForm;
 }
-
+//this function gathers data from the form to be called by handleRequest later
 function getParamForm() {
   var paramForm = document.getElementById('paramForm').value;
   return paramForm;
 }
-
-  /*This is the function that the button calls. It defines sku 
-  as a variable based on the value in the text form.
-  Then, it passes sku to the function requestItemInfo.*/
+/*this function collects data from getDateForm and getParam form, makes sure both of the required values exist, 
+and passes them to the requestItemInfo function.*/
 function handleRequest() {
   var dateForm = getDateForm();
   var paramForm = getParamForm();
@@ -34,40 +28,54 @@ function handleRequest() {
     }
   return response;
 }
-//takes the response and parses it to a json object, makes the json object accessible to other functions, passes the json object to makepretty
+/*this function takes the data from handleRequest and first puts together the URL string to be sent as part of a GET request later
+Then it declares a new XHR reqquest
+Then it initializes the newly created request as a GET request and passes in the string 
+Then it sets the request header using setRequestHeader because apparently it has to
+Then it sends the request
+Then, when the response is back, it performs a function
+This function takes the json string response and stores it as the variable 'response'
+This function will pass the json string response to the function parseResponse*/
+function requestItemInfo(dateForm, paramForm) {
+  var endpoint = "https://reidsm100.checkfront.com/api/3.0/item?start_date=" + dateForm + "&end_date=" + dateForm + "&param[participants]=" + paramForm;
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", endpoint); 
+	xhr.setRequestHeader("Content-Type", "application/json"); 
+	xhr.send();
+  xhr.onload = function (data) {
+    var response = data.currentTarget.response
+    return parseResponse(response);
+  }
+}
+//this function parses the json string response from requestItemInfo
+//it also passes the parsedResponse object to several other functions since this object is so useful
 function parseResponse(response) {
   var parsedResponse = JSON.parse(response);
-  var newParsedResponse = makePretty(parsedResponse);
-  var newIsAvailable = showAvailable(parsedResponse);
+  var passToMakePretty = makePretty(parsedResponse);
+  var passToChangeResponseToArray = changeResponseToArray(parsedResponse);
+  console.log(parsedResponse);
   return parsedResponse;
 }
-
-//makes the parsed response look good
+//this function prints a human readable json object on the page, mainly for testing
 function makePretty(parsedResponse) {
   var prettyResponse = JSON.stringify(parsedResponse, null, 2);
   document.getElementById('response').textContent=prettyResponse;
 }
-
-//supposed to show "availabe" or "unavailable" based on the response, but is currently broken
-function showAvailable(parsedResponse) {
-  console.log(parsedResponse);
-  var isAvailable = parsedResponse.items;
-  document.getElementById('p1').textContent=isAvailable;
+/*this function changes the parsed response from parseResponse to an array so we can run a loop on it later
+but we need the array of items, and this doesn't provide that, it provides other objects which may be useful later
+we will have to run the Object.values function again on one part of this array to get what we need
+This function also passes the array formatted json response to changeARToIA*/
+function changeResponseToArray(parsedResponse) {
+  var arrayResponse = Object.values(parsedResponse);
+  var passArrayResponseTochangeArrayResponseToItemArray = changeARToIA(arrayResponse);
   console.log(Object.values(parsedResponse));
-  var parsedArray = Object.values(parsedResponse);
-  var parsedItems = Object.values(parsedArray[7]);
-  console.log(parsedItems[0].rate.status);
+  return arrayResponse;
 }
-
-function requestItemInfo(dateForm, paramForm) {//creates a function and passes in the variable 'sku', the function will make a GET request to Checkfront's API
-  var endpoint = "https://reidsm100.checkfront.com/api/3.0/item?start_date=" + dateForm + "&end_date=" + dateForm + "&param[participants]=" + paramForm;//concatenates string based on item
-	var xhr = new XMLHttpRequest();//creates a new instance of the XMLHttpRequest() called xhr
-	xhr.open("GET", endpoint); //(method, url), method can be get, post, put, delete
-	xhr.setRequestHeader("Content-Type", "application/json"); //(the name of the header whose value is to be set,the value to set as the body of the header)
-	xhr.send();//(body), optional, can be a document or formdata
-  xhr.onload = function (data) {//this is the function called when the xhr request completes successfully
-    var response = data.currentTarget.response//the response is text but this parses the text into a json object
-    return parseResponse(response);
-  }
+/*This function narrows down the array response to just an array of items that we can more easily loop over*/
+function changeARToIA (arrayResponse) {
+  var parsedItems = Object.values(arrayResponse[7]);
+  console.log(parsedItems);
+  console.log(parsedItems[0].rate.status);
+  return parsedItems;
 }
 </script>
