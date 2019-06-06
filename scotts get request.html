@@ -54,6 +54,7 @@ function showAvailable(parsedResponse) {
   var isAvailable = parsedResponse.items[0];
   document.getElementById('p1').textContent=isAvailable;
   console.log(isAvailable);
+  console.log(typeof parsedResponse.items);
 }
 
 function requestItemInfo(dateForm, paramForm) {//creates a function and passes in the variable 'sku', the function will make a GET request to Checkfront's API
