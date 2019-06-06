@@ -1,6 +1,6 @@
 <body>
 	<form>
-        <input type="date" id="dateForm" value="2020-06-30" />
+        <input type="date" id="dateForm" value="2019-06-30" />
         <input type="number" id="paramForm" value="2" />
   </form>
   <button type="button" onclick="handleRequest()">Click Me!</button>
@@ -51,16 +51,18 @@ function requestItemInfo(dateForm, paramForm) {
 //it also passes the parsedResponse object to several other functions since this object is so useful
 function parseResponse(response) {
   var parsedResponse = JSON.parse(response);
-  var passToMakePretty = makePretty(parsedResponse);
+  //var passToMakePretty = makePretty(parsedResponse);
   var passToChangeResponseToArray = changeResponseToArray(parsedResponse);
   console.log(parsedResponse);
   return parsedResponse;
 }
 //this function prints a human readable json object on the page, mainly for testing
+/*
 function makePretty(parsedResponse) {
   var prettyResponse = JSON.stringify(parsedResponse, null, 2);
   document.getElementById('response').textContent=prettyResponse;
 }
+*/
 /*this function changes the parsed response from parseResponse to an array so we can run a loop on it later
 but we need the array of items, and this doesn't provide that, it provides other objects which may be useful later
 we will have to run the Object.values function again on one part of this array to get what we need
@@ -71,11 +73,26 @@ function changeResponseToArray(parsedResponse) {
   console.log(Object.values(parsedResponse));
   return arrayResponse;
 }
-/*This function narrows down the array response to just an array of items that we can more easily loop over*/
+/*This function narrows down the array response to just an array of items that we can more easily loop over
+and prints some parts of the json object to test stuff*/
 function changeARToIA (arrayResponse) {
   var parsedItems = Object.values(arrayResponse[7]);
+  var passParsedItemsToshowIfAvailable = showItemIfAvailable(parsedItems);
   console.log(parsedItems);
   console.log(parsedItems[0].rate.status);
   return parsedItems;
 }
+/*This function loops over the response and provides item names only of available items, and then creates a div
+for each item that is available that says "[this item] is available to book*/
+function showItemIfAvailable(parsedItems) {
+  for (var i = 0; i < parsedItems.length; i++) {
+    if (parsedItems[i].rate.status === 'AVAILABLE') {
+        console.log(parsedItems[i].name);
+        var itemDiv = document.createElement('div');
+        itemDiv.textContent = parsedItems[i].name + " is available to book";
+        document.body.appendChild(itemDiv);
+    } 
+  }
+}
+
 </script>
