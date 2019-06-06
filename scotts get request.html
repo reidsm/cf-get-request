@@ -51,10 +51,12 @@ function makePretty(parsedResponse) {
 //supposed to show "availabe" or "unavailable" based on the response, but is currently broken
 function showAvailable(parsedResponse) {
   console.log(parsedResponse);
-  var isAvailable = parsedResponse.items[0];
+  var isAvailable = parsedResponse.items;
   document.getElementById('p1').textContent=isAvailable;
-  console.log(isAvailable);
-  console.log(typeof parsedResponse.items);
+  console.log(Object.values(parsedResponse));
+  var parsedArray = Object.values(parsedResponse);
+  var parsedItems = Object.values(parsedArray[7]);
+  console.log(parsedItems[0].rate.status);
 }
 
 function requestItemInfo(dateForm, paramForm) {//creates a function and passes in the variable 'sku', the function will make a GET request to Checkfront's API
