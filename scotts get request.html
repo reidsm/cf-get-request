@@ -79,7 +79,7 @@
   function changeARToIA(arrayResponse) {
     var parsedItems = Object.values(arrayResponse[7]);
     var timeslotObj = getTSFromIR(parsedItems);
-    display(timeslotObj, parsedItems);
+    //display(timeslotObj, parsedItems);
     console.log("item test", parsedItems);
     //console.log(parsedItems[0].rate.status);
     return parsedItems;
@@ -87,25 +87,15 @@
 
   function getTSFromIR(parsedItems) {
     var timeslotObj = {};//create the timeslotObj variable as an object
+    var paramForm = getParamForm();
     for (var i = 0; i < parsedItems.length; i++) { //loop through the parsed items array
       var rate = parsedItems[i].rate; //store the rate object from each item in the parsedItems array as a rate
       var item_id = parsedItems[i].item_id; //store the item_id result for each item in the parsedItems array as an item_id
       var timeslots = rate.dates[rate.start_date].timeslots; //store the timeslot information for each date in each item rate as a timeslot array. Pull the start date from rate.start_date because it's formatted correctly
       console.log(timeslotObj);
       timeslotObj[item_id] = timeslots;//reconfigure the timeslotObj array to have a key of the Item ID, but the value of each item key is actually the timeslot array for the start_date
-      console.log(timeslots);
-      //display(timeslots);
-    }
-    return timeslotObj;
-  }
-
-  function display(timeslotObj, parsedItems, timeslots) {
-    var paramForm = getParamForm(); //gets the value from the parameter input form to compare with the number of available spaces
-    console.log(timeslots);
-    for (var i = 0; i < parsedItems.length; i++) { //loop through all items in the parsedItems array
-      var item_id = parsedItems[i].item_id; //set the item_id equal to the correct item's item_id in the item array
-      for (var j = 0; j < parsedItems.length; j++) {//loop through both items in the item array again
-        if (timeslotObj[item_id][j].A >= paramForm) {//only run the next bit of code if the number available is greater than the number of people who want to go
+      for (var j = 0; j < timeslots.length; j++) {
+        if (timeslotObj[item_id][j].A >= paramForm) {
           var availableTimeslot = timeslotObj[item_id][j].start_time;//store the start time data from the timeslot array as availableTimeslot
           var itemDiv = document.createElement('div');//create a new div
           itemDiv.setAttribute("id", "div" + [i]);//set the id of the div to the spot in the item array
@@ -113,6 +103,19 @@
           document.body.appendChild(itemDiv);//add the new div to the bottom of the page
         }
       }
+      //call another function that builds stuff, pass in name, description, and an array of timeslots (lline 99)
+      //make an UL from the array
+      //give the div a class for each item
+      //div class=name
+      //h2 name
+      //h3 description
+      //ul
+      //li
+      //li
+      //ul
+      //div
     }
+    return timeslotObj;
   }
+
 </script>
