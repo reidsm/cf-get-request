@@ -1,98 +1,118 @@
 <body>
-	<form>
-        <input type="date" id="dateForm" value="2019-06-30" />
-        <input type="number" id="paramForm" value="2" />
+  <form>
+    <input type="date" id="dateForm" value="2019-06-30" />
+    <input type="number" id="paramForm" value="2" />
   </form>
   <button type="button" onclick="handleRequest()">Click Me!</button>
   <pre id="response"></pre>
 </body>
 
 <script>
-//this function gathers data from the form to be called by handleRequest later
-function getDateForm() {
-  var dateForm = document.getElementById('dateForm').value;
-  return dateForm;
-}
-//this function gathers data from the form to be called by handleRequest later
-function getParamForm() {
-  var paramForm = document.getElementById('paramForm').value;
-  return paramForm;
-}
-/*this function collects data from getDateForm and getParam form, makes sure both of the required values exist, 
-and passes them to the requestItemInfo function.*/
-function handleRequest() {
-  var dateForm = getDateForm();
-  var paramForm = getParamForm();
+  //this function gathers data from the form to be called by handleRequest later
+  function getDateForm() {
+    var dateForm = document.getElementById('dateForm').value;
+    return dateForm;
+  }
+  //this function gathers data from the form to be called by handleRequest later
+  function getParamForm() {
+    var paramForm = document.getElementById('paramForm').value;
+    return paramForm;
+  }
+  /*this function collects data from getDateForm and getParam form, makes sure both of the required values exist, 
+  and passes them to the requestItemInfo function.*/
+  function handleRequest() {
+    var dateForm = getDateForm();
+    var paramForm = getParamForm();
     if (dateForm !== null && paramForm !== null) {
-    	var response = requestItemInfo(dateForm, paramForm);
+      var response = requestItemInfo(dateForm, paramForm);
     }
-  return response;
-}
-/*this function takes the data from handleRequest and first puts together the URL string to be sent as part of a GET request later
-Then it declares a new XHR reqquest
-Then it initializes the newly created request as a GET request and passes in the string 
-Then it sets the request header using setRequestHeader because apparently it has to
-Then it sends the request
-Then, when the response is back, it performs a function
-This function takes the json string response and stores it as the variable 'response'
-This function will pass the json string response to the function parseResponse*/
-function requestItemInfo(dateForm, paramForm) {
-  var endpoint = "https://reidsm100.checkfront.com/api/3.0/item?start_date=" + dateForm + "&end_date=" + dateForm + "&param[participants]=" + paramForm;
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", endpoint); 
-	xhr.setRequestHeader("Content-Type", "application/json"); 
-	xhr.send();
-  xhr.onload = function (data) {
-    var response = data.currentTarget.response
-    return parseResponse(response);
+    return response;
   }
-}
-//this function parses the json string response from requestItemInfo
-//it also passes the parsedResponse object to several other functions since this object is so useful
-function parseResponse(response) {
-  var parsedResponse = JSON.parse(response);
-  //var passToMakePretty = makePretty(parsedResponse);
-  var passToChangeResponseToArray = changeResponseToArray(parsedResponse);
-  console.log(parsedResponse);
-  return parsedResponse;
-}
-//this function prints a human readable json object on the page, mainly for testing
-/*
-function makePretty(parsedResponse) {
-  var prettyResponse = JSON.stringify(parsedResponse, null, 2);
-  document.getElementById('response').textContent=prettyResponse;
-}
-*/
-/*this function changes the parsed response from parseResponse to an array so we can run a loop on it later
-but we need the array of items, and this doesn't provide that, it provides other objects which may be useful later
-we will have to run the Object.values function again on one part of this array to get what we need
-This function also passes the array formatted json response to changeARToIA*/
-function changeResponseToArray(parsedResponse) {
-  var arrayResponse = Object.values(parsedResponse);
-  var passArrayResponseTochangeArrayResponseToItemArray = changeARToIA(arrayResponse);
-  console.log(Object.values(parsedResponse));
-  return arrayResponse;
-}
-/*This function narrows down the array response to just an array of items that we can more easily loop over
-and prints some parts of the json object to test stuff*/
-function changeARToIA (arrayResponse) {
-  var parsedItems = Object.values(arrayResponse[7]);
-  var passParsedItemsToshowIfAvailable = showItemIfAvailable(parsedItems);
-  console.log(parsedItems);
-  console.log(parsedItems[0].rate.status);
-  return parsedItems;
-}
-/*This function loops over the response and provides item names only of available items, and then creates a div
-for each item that is available that says "[this item] is available to book*/
-function showItemIfAvailable(parsedItems) {
-  for (var i = 0; i < parsedItems.length; i++) {
-    if (parsedItems[i].rate.status === 'AVAILABLE') {
-        console.log(parsedItems[i].name);
-        var itemDiv = document.createElement('div');
-        itemDiv.textContent = parsedItems[i].name + " is available to book";
-        document.body.appendChild(itemDiv);
-    } 
+  /*this function takes the data from handleRequest and first puts together the URL string to be sent as part of a GET request later
+  Then it declares a new XHR reqquest
+  Then it initializes the newly created request as a GET request and passes in the string 
+  Then it sets the request header using setRequestHeader because apparently it has to
+  Then it sends the request
+  Then, when the response is back, it performs a function
+  This function takes the json string response and stores it as the variable 'response'
+  This function will pass the json string response to the function parseResponse*/
+  function requestItemInfo(dateForm, paramForm) {
+    var endpoint = "https://reidsm100.checkfront.com/api/3.0/item?start_date=" + dateForm + "&end_date=" + dateForm + "&param[participants]=" + paramForm;
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", endpoint);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send();
+    xhr.onload = function (data) {
+      var response = data.currentTarget.response
+      return parseResponse(response);
+    }
   }
-}
+  //this function parses the json string response from requestItemInfo
+  //it also passes the parsedResponse object to several other functions since this object is so useful
+  function parseResponse(response) {
+    var parsedResponse = JSON.parse(response);
+    //var passToMakePretty = makePretty(parsedResponse);
+    var passToChangeResponseToArray = changeResponseToArray(parsedResponse);
+    console.log(parsedResponse);
+    return parsedResponse;
+  }
 
+  //this function prints a human readable json object on the page, mainly for testing
+  /*
+    function makePretty(parsedResponse) {
+      var prettyResponse = JSON.stringify(parsedResponse, null, 2);
+      document.getElementById('response').textContent = prettyResponse;
+    }
+  */
+  /*this function changes the parsed response from parseResponse to an array so we can run a loop on it later
+  but we need the array of items, and this doesn't provide that, it provides other objects which may be useful later
+  we will have to run the Object.values function again on one part of this array to get what we need
+  This function also passes the array formatted json response to changeARToIA*/
+  function changeResponseToArray(parsedResponse) {
+    var arrayResponse = Object.values(parsedResponse);
+    var passArrayResponseTochangeArrayResponseToItemArray = changeARToIA(arrayResponse);
+    //console.log(Object.values(parsedResponse));
+    return arrayResponse;
+  }
+  /*This function narrows down the array response to just an array of items that we can more easily loop over
+  and prints some parts of the json object to test stuff*/
+  function changeARToIA(arrayResponse) {
+    var parsedItems = Object.values(arrayResponse[7]);
+    var timeslotObj = getTSFromIR(parsedItems);
+    display(timeslotObj, parsedItems);
+    console.log("item test", parsedItems);
+    //console.log(parsedItems[0].rate.status);
+    return parsedItems;
+  }
+
+  function getTSFromIR(parsedItems) {
+    var timeslotObj = {};//create the timeslotObj variable as an object
+    for (var i = 0; i < parsedItems.length; i++) { //loop through the parsed items array
+      var rate = parsedItems[i].rate; //store the rate object from each item in the parsedItems array as a rate
+      var item_id = parsedItems[i].item_id; //store the item_id result for each item in the parsedItems array as an item_id
+      var timeslots = rate.dates[rate.start_date].timeslots; //store the timeslot information for each date in each item rate as a timeslot array. Pull the start date from rate.start_date because it's formatted correctly
+      console.log(timeslotObj);
+      timeslotObj[item_id] = timeslots;//reconfigure the timeslotObj array to have a key of the Item ID, but the value of each item key is actually the timeslot array for the start_date
+      console.log(timeslots);
+      //display(timeslots);
+    }
+    return timeslotObj;
+  }
+
+  function display(timeslotObj, parsedItems, timeslots) {
+    var paramForm = getParamForm(); //gets the value from the parameter input form to compare with the number of available spaces
+    console.log(timeslots);
+    for (var i = 0; i < parsedItems.length; i++) { //loop through all items in the parsedItems array
+      var item_id = parsedItems[i].item_id; //set the item_id equal to the correct item's item_id in the item array
+      for (var j = 0; j < parsedItems.length; j++) {//loop through both items in the item array again
+        if (timeslotObj[item_id][j].A >= paramForm) {//only run the next bit of code if the number available is greater than the number of people who want to go
+          var availableTimeslot = timeslotObj[item_id][j].start_time;//store the start time data from the timeslot array as availableTimeslot
+          var itemDiv = document.createElement('div');//create a new div
+          itemDiv.setAttribute("id", "div" + [i]);//set the id of the div to the spot in the item array
+          itemDiv.textContent = parsedItems[i].name + " is available to book at " + availableTimeslot;//print "item name is available to book at timeslot" in the new div
+          document.body.appendChild(itemDiv);//add the new div to the bottom of the page
+        }
+      }
+    }
+  }
 </script>
