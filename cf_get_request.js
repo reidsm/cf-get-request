@@ -1,4 +1,6 @@
 //this function gathers data from the form to be called by handleRequest later
+
+
 function getDateForm() {
   var dateForm = document.getElementById('dateForm').value;
   return dateForm;
@@ -47,6 +49,7 @@ function handleResponse(data) {
   var parsedItems = Object.values(parsedResponse.items);
   var itemTimeslotArray = buildTimeslotArray(parsedItems);
   // pageConstructor(parsedItems, itemTimeslotArray);
+  console.log(parsedItems);
   htmlConstructor(parsedItems, itemTimeslotArray);
 }
 
@@ -66,6 +69,7 @@ function buildTimeslotArray(parsedItems) {
     var timeslotArray = rate.dates[rate.start_date].timeslots;
     itemTimeslotArray.push(timeslotArray);
   }
+  console.log(itemTimeslotArray);
   return itemTimeslotArray;
 }
 /*This function creates a div for each item, sets the div id to [i], containing the name in h3 tags and the summary. it calls the timeslotHTML function
@@ -73,21 +77,48 @@ to add the available timeslots as list items within the ul tag, and adds the ite
 function htmlConstructor (parsedItems, itemTimeslotArray) {
   var itemHTML = "";
   for (var j = 0; j < parsedItems.length; j++) {
-    var timeslotLiHTML = timeslotHTML(itemTimeslotArray, j);
-    itemHTML += "<div id=" + [j] + "><h3>" + parsedItems[j].name + "</h3>" + parsedItems[j].summary + "<ul>" + timeslotLiHTML + "</ul></div>";
+    var timeslotLiHTML = timeslotHTML(itemTimeslotArray, j, parsedItems);
+    itemHTML += "<div id=" + [j] + "><h3>" + parsedItems[j].name + "</h3>" + parsedItems[j].summary + "<ul>" + timeslotLiHTML + "</ul></div><data>"+ parsedItems[j].item_id +"</data>";
   }
   document.body.innerHTML = itemHTML;
   return itemHTML;
 }
 /*for each item there is an unordered list for each available timeslot (the if statement will prevent unavailable timeslots from appearing). this function loops over 
 each item's timeslot array to create each list item as html, and returns this html*/
-function timeslotHTML(itemTimeslotArray, j) {
+function timeslotHTML(itemTimeslotArray, j, parsedItems) {
   var timeslotLiHTML = "";
   var paramForm = getParamForm();
   for (k = 0; k < itemTimeslotArray[j].length; k++) {
     if (itemTimeslotArray[j][k].A >= paramForm) {
-      timeslotLiHTML += "<li>Available at " + itemTimeslotArray[j][k].start_time + "<button id=" + [j] + [k] + " class=bookingButton onlick=getTimeslotSlip();>Book Now</button></li>";
+      var slotSlip = $.get("https://reidsm100.checkfront.com/api/3.0/item/" + parsedItems[j].item_id
+      + "?start_date="
+      + getDateForm()
+      + "&end_date=" 
+      + getDateForm()
+      + "&param[participants]=" 
+      + paramForm 
+      + "&start_time="
+      + itemTimeslotArray[j][k].start_time);
+
+      //console.log(JSON.parse(slotSlip));
+
+      timeslotLiHTML += "<li>Available at " + itemTimeslotArray[j][k].start_time + "<button id=" + ([j] + [k]) + " class=bookingButton onlick=getTimeslotSlip();>Book Now</button><data>" + itemTimeslotArray[j][k].start_time + "</data></li>";
+
+      console.log(slotSlip);
+      //var parsedSlotSlip = JSON.parse(slotSlip);
+      //timeslotLiHTML += "<data>" + slotSlip + "</data>";
     }
   }
   return timeslotLiHTML;
 }
+
+/*
+$.get("https://reidsm100.checkfront.com/api/3.0/item?start_date=" 
++ dateForm 
++ "&end_date=" 
++ dateForm 
++ "&param[participants]=" 
++ paramForm 
++ "&start_time="
++ itemTimeslotArray[j][k].start_time)
+*/ 
