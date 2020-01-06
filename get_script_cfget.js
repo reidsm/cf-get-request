@@ -48,11 +48,15 @@ This function can be thought of as a variable storage center that stores all the
 the response in the format we need, and also calls pageConstructor to put the page together*/
 function handleResponse(data) {
   var parsedResponse = JSON.parse(data.currentTarget.response);
+  console.log(parsedResponse.items);
   var parsedItems = Object.values(parsedResponse.items);
   var itemTimeslotArray = buildTimeslotArray(parsedItems);
   // pageConstructor(parsedItems, itemTimeslotArray);
   console.log(parsedItems);
-  htmlConstructor(parsedItems, itemTimeslotArray);
+  var currentDate = getDateForm();
+  var paramForm = getParamForm();
+//   console.log(currentDate);
+  htmlConstructor(parsedItems, itemTimeslotArray, currentDate, paramForm);
 }
 
 /*This function restructures part of the response so that the page constructor can loop through it intelligently
@@ -76,15 +80,17 @@ function buildTimeslotArray(parsedItems) {
 }
 /*This function creates a div for each item, sets the div id to [i], containing the name in h3 tags and the summary. it calls the timeslotHTML function
 to add the available timeslots as list items within the ul tag, and adds the itemhtml to the document's body*/
-function htmlConstructor (parsedItems, itemTimeslotArray) {
+function htmlConstructor (parsedItems, itemTimeslotArray, currentDate, paramForm) {
   var itemHTML = "";
   for (var j = 0; j < parsedItems.length; j++) {
     var timeslotLiHTML = timeslotHTML(itemTimeslotArray, j, parsedItems);
-    itemHTML += "<div id=" + [j] + "><h3>" + parsedItems[j].name + "</h3>" + parsedItems[j].summary + "<ul>" + timeslotLiHTML + "</ul></div><data>"+ parsedItems[j].item_id +"</data>";
+    itemHTML += "<div id=" + [j] + "><h3>" + parsedItems[j].name + "</h3>" + parsedItems[j].summary + "<ul>" 
+    + timeslotLiHTML + "</ul></div><data>"+ parsedItems[j].item_id +"</data>";
   }
   document.body.innerHTML = itemHTML;
-  return itemHTML;
+  addEventListeners(parsedItems, itemTimeslotArray, currentDate, paramForm);
 }
+
 /*for each item there is an unordered list for each available timeslot (the if statement will prevent unavailable timeslots from appearing). this function loops over 
 each item's timeslot array to create each list item as html, and returns this html*/
 function timeslotHTML(itemTimeslotArray, j, parsedItems) {
@@ -92,27 +98,145 @@ function timeslotHTML(itemTimeslotArray, j, parsedItems) {
   var paramForm = getParamForm();
   for (k = 0; k < itemTimeslotArray[j].length; k++) {
     if (itemTimeslotArray[j][k].A >= paramForm) {
-      var slotSlip = $.get("https://reidsm100.checkfront.com/api/3.0/item/" + parsedItems[j].item_id
-      + "?start_date="
-      + getDateForm()
-      + "&end_date=" 
-      + getDateForm()
-      + "&param[participants]=" 
-      + paramForm 
-      + "&start_time="
-      + itemTimeslotArray[j][k].start_time);
 
-      //console.log(JSON.parse(slotSlip));
+        // console.log(getDateForm());
 
-      timeslotLiHTML += "<li>Available at " + itemTimeslotArray[j][k].start_time + "<button id=" + ([j] + [k]) + " class=bookingButton onlick=getTimeslotSlip();>Book Now</button><data>" + itemTimeslotArray[j][k].start_time + "</data></li>";
+        var url = "https://reidsm100.checkfront.com/api/3.0/item/" + parsedItems[j].item_id
+        + "?start_date="
+        + getDateForm()
+        + "&end_date=" 
+        + getDateForm()
+        + "&param[participants]=" 
+        + paramForm 
+        + "&start_time="
+        + itemTimeslotArray[j][k].start_time;
 
-      console.log(slotSlip);
-      //var parsedSlotSlip = JSON.parse(slotSlip);
-      //timeslotLiHTML += "<data>" + slotSlip + "</data>";
+        console.log(url);
+        
+
+        // var test = findSlotSlip();
+
+        // async function findSlotSlip() {
+        //     let result = get(url).then(function(response){
+        //         var jsonRes = JSON.parse(response);
+        //         var slotSlip = jsonRes.item.rate.slip;
+        //         console.log(slotSlip);
+        //         return slotSlip;
+        //     });
+            
+            
+        //     // return result;
+        // }
+
+        // findSlotSlip();
+        // console.log(test);
+        
+
+
+
+      timeslotLiHTML += "<li>Available at " + itemTimeslotArray[j][k].start_time 
+      + "<button id=" + (j + '/' + itemTimeslotArray[j][k].start_time + '/' + getDateForm() + '/' + paramForm) 
+      + " class=bookingButton>Book Now" + itemTimeslotArray[j][k].start_time + "</button><data>" + itemTimeslotArray[j][k].start_time + "</data></li>";
+
+
+    //   get(url).then(function(response) {
+    //     // console.log("Success!", JSON.parse(response));
+    //     var jsonRes = JSON.parse(response);
+    //     var slotSlip = jsonRes.item.rate.slip;
+    //     console.log(slotSlip);
+    //   }, function(error) {
+    //     console.error("Failed!", error);
+    //   });
+
+
     }
   }
   return timeslotLiHTML;
 }
+
+function addEventListeners(parsedItems, itemTimeslotArray, currentDate, paramForm) {
+    // console.log(currentDate);
+    for (var j = 0; j < parsedItems.length; j++) {
+        for (k = 0; k < itemTimeslotArray[j].length; k++) {
+            var buttonElement = document.getElementById(j + '/' + itemTimeslotArray[j][k].start_time + '/' + currentDate + '/' + paramForm);
+            buttonElement.addEventListener("click", printButtonText, false);
+            
+            // console.log(buttonElement);
+        }
+    }
+}
+
+function printButtonText() {
+    var thisButtonId = this.id;
+    console.log(thisButtonId);
+    var stringArr = thisButtonId.split("/");
+    var thisItem = stringArr[0];
+    console.log(thisItem);
+    var thisTime = stringArr[1];
+    console.log(thisTime);
+    var thisDate = stringArr[2];
+    console.log(thisDate);
+    var thisParam = stringArr[3];
+    console.log(thisParam);
+
+    var url = "https://reidsm100.checkfront.com/api/3.0/item/" + thisItem
+        + "?start_date="
+        + thisDate
+        + "&end_date=" 
+        + thisDate
+        + "&param[participants]=" 
+        + thisParam 
+        + "&start_time="
+        + thisTime;
+
+        console.log(url);
+
+    // console.log(this.innerText);
+    //    get(url).then(function(response) {
+    //     // console.log("Success!", JSON.parse(response));
+    //     var jsonRes = JSON.parse(response);
+    //     var slotSlip = jsonRes.item.rate.slip;
+    //     console.log(slotSlip);
+    //   }, function(error) {
+    //     console.error("Failed!", error);
+    //   });
+}
+
+
+
+
+function get(url) {
+    // Return a new promise.
+    return new Promise(function(resolve, reject) {
+      // Do the usual XHR stuff
+      var req = new XMLHttpRequest();
+      req.open("GET", url);
+      req.setRequestHeader("Content-Type", "application/json");
+//   console.log("I am running");
+  
+      req.onload = function() {
+        // This is called even on 404 etc
+        // so check the status
+        if (req.status == 200) {
+          // Resolve the promise with the response text
+          resolve(req.response);
+        }
+        else {
+          // Otherwise reject with the status text
+          // which will hopefully be a meaningful error
+          reject(Error(req.statusText));
+        }
+      };
+  
+      // Handle network errors
+      req.onerror = function() {
+        reject(Error("Network Error"));
+      };
+  
+      // Make the request
+      req.send();
+    });
+  }
 
 
 /*

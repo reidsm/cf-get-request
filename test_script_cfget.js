@@ -118,6 +118,7 @@ function getDateForm() {
         var jsonRes = JSON.parse(response);
         var slotSlip = jsonRes.item.rate.slip;
         console.log(slotSlip);
+        window.location.href = "./form.html?" + slotSlip;
       }, function(error) {
         console.error("Failed!", error);
       });
